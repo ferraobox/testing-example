@@ -59,8 +59,9 @@ describeIfCredentials('live contract — POST /token', () => {
     form.append('client_id', 'bad_id')
     form.append('client_secret', 'bad_secret')
     form.append('grant_type', 'client_credentials')
-    const errRaw = await http.post<unknown>('/token', form).catch((e) => {
-      if (e?.response?.data !== undefined) return e.response.data
+    const errRaw = await http.post<unknown>('/token', form).catch((e: unknown) => {
+      const err = e as { response?: { data?: unknown } }
+      if (err.response?.data !== undefined) return err.response.data
       throw e
     })
     // Real API 401 shape: { data: { [field]: string }, meta: { message: string } }
@@ -146,8 +147,9 @@ describeIfCredentials('live contract — POST /orders', () => {
       .post<unknown>('/orders', form, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
-      .catch((e) => {
-        if (e?.response?.data !== undefined) return e.response.data
+      .catch((e: unknown) => {
+        const err = e as { response?: { data?: unknown } }
+        if (err.response?.data !== undefined) return err.response.data
         throw e
       })
     // Real API error shape: { code: number, reason: string }
@@ -208,14 +210,11 @@ describeIfCredentials('live contract — GET /sims/{iccid}', () => {
     expect(parsed.data.created_at.length).toBeGreaterThan(0)
     expect(typeof parsed.meta.message).toBe('string')
     expect(parsed.meta.message).toMatch(/success/i)
-
-    // Optional simable — if present, verify its types too
-    if (parsed.data.simable) {
-      expect(typeof parsed.data.simable.id).toBe('number')
-      expect(parsed.data.simable.package_id).toBe(AIRALO_DEFAULT_PACKAGE_ID)
-      expect(typeof parsed.data.simable.currency).toBe('string')
-      expect(typeof parsed.data.simable.type).toBe('string')
-    }
+    expect(parsed.data.simable).toBeDefined()
+    expect(typeof parsed.data.simable?.id).toBe('number')
+    expect(parsed.data.simable?.package_id).toBe(AIRALO_DEFAULT_PACKAGE_ID)
+    expect(typeof parsed.data.simable?.currency).toBe('string')
+    expect(typeof parsed.data.simable?.type).toBe('string')
   })
 
   it('all 6 eSIM responses parse without Zod errors (R3.2)', async () => {
@@ -242,8 +241,9 @@ describeIfCredentials('live contract — GET /sims/{iccid}', () => {
       .get<unknown>('/sims/invalid-iccid-00000', {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
-      .catch((e) => {
-        if (e?.response?.data !== undefined) return e.response.data
+      .catch((e: unknown) => {
+        const err = e as { response?: { data?: unknown } }
+        if (err.response?.data !== undefined) return err.response.data
         throw e
       })
     // Real API 404 shape: { data: [], meta: { message: string } }

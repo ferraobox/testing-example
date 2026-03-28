@@ -7,7 +7,6 @@ import { AxiosError, type AxiosResponse } from 'axios'
 export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse }
 
 // ── Order / eSIM result builders ────────────────────────────
-
 export const buildOrderResult = (simCount: number): AiraloOrderResult => ({
   orderId: 9666,
   message: 'success',
