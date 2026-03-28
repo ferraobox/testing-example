@@ -43,10 +43,11 @@ export async function retryOnTransient<T>(
   throw lastError
 }
 
-/** Returns true for 5xx status codes and network/timeout errors. */
+/** Returns true for 5xx, 429 (rate-limit) status codes and network/timeout errors. */
 export function isTransient(err: unknown): boolean {
   if (!axios.isAxiosError(err)) return false
   const status = err.response?.status
+  if (status === 429) return true
   if (status !== undefined && status >= 500) return true
   return (
     err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET'
